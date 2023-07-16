@@ -10,6 +10,16 @@ class DataCleaning:
         pass
 
     def clean_user_data(self, selcted_table):
+        """
+        Alternatively, use the code
+        # Convert 'join_date' and 'date_of_birth' to datetime format
+        df_users['join_date'] = pd.to_datetime(df_users['join_date'], errors='coerce')
+        df_users['date_of_birth'] = pd.to_datetime(df_users['date_of_birth'], errors='coerce')
+        # Drop rows where 'join_date' and 'date_of_birth' cannot be transformed to the desired format
+        df_users = df_users.dropna(subset=['join_date', 'date_of_birth'])
+        # Check for null values and drop rows with any null values
+        df_users = df_users.dropna()
+        """
         #%%CLEAN TIME DATA
         time_col = 'date_of_birth' 
         date_list=[]
@@ -21,7 +31,26 @@ class DataCleaning:
             date_list.append(date)
         selcted_table[time_col] = date_list
         selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+        #examine the another column about datetime data
+        date_list=[]
+        time_col = 'join_date'
+        for i in range(len(selcted_table[time_col])):
+            date = pd.to_datetime(selcted_table[time_col].iloc[i],errors='coerce').date()
+            date_list.append(date)
+        selcted_table[time_col] = date_list
+        selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+
+
         return selcted_table
+    
+
+    def clean_card_details(self,selcted_table):
+        # Remove rows with null values
+        df_cleaned = selcted_table.dropna()
+        # Convert 'expiry_date' and 'date_payment_confirmed' to datetime format
+        df_cleaned['expiry_date'] = pd.to_datetime(df_cleaned['expiry_date'], format='%m/%y', errors='coerce')
+        df_cleaned['date_payment_confirmed'] = pd.to_datetime(df_cleaned['date_payment_confirmed'], errors='coerce')
+        return df_cleaned
 
 
     def clean_store_data(self,selcted_table):
@@ -212,24 +241,49 @@ class DataCleaning:
 # update_db = DatabaseConnector()
 # update_db.upload_to_db(selcted_table,'orders_table')
 
-# %%milestone 2 task 8
-import requests
-url = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
-reponse = requests.get(url)
-store_list = reponse.json()
-# %%
-import pandas as pd
-selcted_table = pd.DataFrame.from_dict(store_list)
-#%%
-for i in range(len(selcted_table['year'])):
-    x = selcted_table['year'].iloc[i]
-    if len(str(x)) != 4 or x=='NULL':
-        selcted_table['year'].iloc[i]=None
-#%%
-selcted_table.drop(selcted_table[selcted_table['year'].isna()].index, inplace=True)
-
+# # %%milestone 2 task 8
+# import requests
+# url = 'https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json'
+# reponse = requests.get(url)
+# store_list = reponse.json()
+# # %%
+# import pandas as pd
+# selcted_table = pd.DataFrame.from_dict(store_list)
 # #%%
-update_db = DatabaseConnector()
-update_db.upload_to_db(selcted_table,'dim_date_times')
+# for i in range(len(selcted_table['year'])):
+#     x = selcted_table['year'].iloc[i]
+#     if len(str(x)) != 4 or x=='NULL':
+#         selcted_table['year'].iloc[i]=None
+# #%%
+# selcted_table.drop(selcted_table[selcted_table['year'].isna()].index, inplace=True)
 
-# %%
+# # #%%
+# update_db = DatabaseConnector()
+# update_db.upload_to_db(selcted_table,'dim_date_times')
+
+# # %%
+# #%%
+# import pandas as pd
+# df = pd.read_csv('card_details.csv')
+# # Check for null values
+# null_values = df.isnull().sum()
+
+# # Analyze data types of each column
+# data_types = df.dtypes
+
+# null_values, data_types
+
+# # Remove rows with null values
+# df_cleaned = df.dropna()
+
+# # Convert 'expiry_date' and 'date_payment_confirmed' to datetime format
+# df_cleaned['expiry_date'] = pd.to_datetime(df_cleaned['expiry_date'], format='%m/%y', errors='coerce')
+# df_cleaned['date_payment_confirmed'] = pd.to_datetime(df_cleaned['date_payment_confirmed'], errors='coerce')
+
+# # Check the first few rows of the cleaned DataFrame and its data types
+# df_cleaned.head(), df_cleaned.dtypes
+
+# # %%
+# update_db = DatabaseConnector()
+# update_db.upload_to_db(df_cleaned,'dim_card_details')
+# # %%

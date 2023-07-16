@@ -21,6 +21,20 @@ cleaned_table = clean_data.clean_user_data(selcted_table)
 update_db = DatabaseConnector()
 update_db.upload_to_db(cleaned_table,'dim_users')
 
+
+#%%                                 milestone2 task4
+########################################################################################
+###### import table form data from database
+get_db = DataExtractor()
+url = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
+selcted_table = get_db.retrieve_pdf_data(url)
+#%%clean table
+clean_data = DataCleaning()
+cleaned_table = clean_data.clean_card_details(selcted_table)
+#%%upload the cleaned table to my sales database
+update_db = DatabaseConnector()
+update_db.upload_to_db(cleaned_table,'dim_card_details')
+
 #%%                                 milestone2 task5
 ########################################################################################
 ###### import table form data from database

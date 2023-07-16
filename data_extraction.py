@@ -56,8 +56,16 @@ class DataExtractor:
         '''
         extract info from a pdf file to pd.dataframe
         '''
-        self.pdf_info = tabula.read_pdf(pdf_path, pages='all')
-        return self.pdf_info
+        pdf_info = tabula.read_pdf(pdf_path, pages='all')
+        # Read tables from the PDF file
+        # Convert each list table to a DataFrame
+        dataframes = []
+        for table in pdf_info:
+            dataframe = pd.DataFrame(table)
+            dataframes.append(dataframe)
+        # Concatenate all DataFrames into a single DataFrame
+        combined_dataframe = pd.concat(dataframes)
+        return combined_dataframe
     
     def list_number_of_stores(self, endpoint, header):
         '''
@@ -119,6 +127,7 @@ class DataExtractor:
 
 
 #%%
+# /Applications/Python\ 3.10/Install\ Certificates.command will save your ass when tubular readpdf returns you sslverification error!
 
 
 
@@ -127,12 +136,28 @@ class DataExtractor:
 # tables = get_db.list_db_tables()
 # store_detail = get_db.read_rds_table('legacy_store_details')
 
-####obtain pdf data
+# #%% ##obtain pdf data
+# get_db = DataExtractor()
 # pdf_path = "https://data-handling-public.s3.eu-west-1.amazonaws.com/card_details.pdf"
-# pdf_path = '/Users/fanzhiwei/Desktop/Aicore-test/multinational-retail-data-centralisation/card_details.pdf'
+# # pdf_path = '/Users/fanzhiwei/Desktop/Aicore-test/multinational-retail-data-centralisation/card_details.pdf'
 # pdf_content = get_db.retrieve_pdf_data(pdf_path)
-# print(pdf_content)
+#%%
+# Read tables from the PDF file
+# Convert each list table to a DataFrame
+# dataframes = []
+# for table in pdf_content:
+#     dataframe = pd.DataFrame(table)
+#     dataframes.append(dataframe)
+# # Concatenate all DataFrames into a single DataFrame
+# combined_dataframe = pd.concat(dataframes)
 
+# #%%
+# combined_dataframe.to_csv("card_details.csv", index=False)
+
+
+
+
+#%%
 ####api port  {API_ENDPOINT}?x-api-key={API_KEY}
 # #number of stores api input
 # API_ENDPOINT = "https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores"
@@ -142,10 +167,7 @@ class DataExtractor:
 # store_datas = get_db.retrieve_stores_data()
 
 
-
-
-
-# # # %%
+# %%
 # import tabula
 # pdf_path = "/Users/fanzhiwei/Desktop/Aicore-test/multinational-retail-data-centralisation/card_details.pdf"
 # dfs = tabula.read_pdf(pdf_path, pages = 1)
