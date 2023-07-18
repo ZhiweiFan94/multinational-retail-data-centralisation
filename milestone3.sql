@@ -3,7 +3,7 @@ SELECT * FROM orders_table
 
 -- Alter the data type of date_uuid column to UUID
 ALTER TABLE orders_table
-ALTER COLUMN date_uuid TYPE UUID USING user_uuid::UUID;
+ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID;
 
 -- Alter the data type of user_uuid column to UUID
 ALTER TABLE orders_table
@@ -68,10 +68,20 @@ ALTER COLUMN join_date TYPE DATE
 -- ############   task 3  ################# --
 SELECT * FROM dim_store_details
 
--- Alter first name
---must transfer to double precision then change the type
+-- Alter 
+-- Step 1: Create a new column with the desired data type
 ALTER TABLE dim_store_details
-ALTER COLUMN longitude TYPE double precision USING (longitude::double precision);
+ADD COLUMN longitude_new double precision;
+-- Step 2: Update the new column with the values from the existing column
+UPDATE dim_store_details
+SET longitude_new = CASE WHEN longitude IS NULL THEN NULL ELSE CAST(longitude AS double precision) END;
+-- Step 3: Drop the old column
+ALTER TABLE dim_store_details
+DROP COLUMN longitude;
+-- Step 4: Rename the new column to the original column name
+ALTER TABLE dim_store_details
+RENAME COLUMN longitude_new TO longitude;
+
 
 ALTER TABLE dim_store_details
 ALTER COLUMN longitude TYPE FLOAT
@@ -81,15 +91,12 @@ ALTER TABLE dim_store_details
 ALTER COLUMN locality TYPE VARCHAR(255);
 
 --Alter store_code
-SELECT MAX(LENGTH(CAST(country_code AS VARCHAR))) FROM dim_store_details
+SELECT MAX(LENGTH(CAST(store_code AS VARCHAR))) FROM dim_store_details
 
 ALTER TABLE dim_store_details
-ALTER COLUMN store_code TYPE VARCHAR(11)
+ALTER COLUMN store_code TYPE VARCHAR(12)
 
 -- Alter staffnum
---delete raws which is not full number value
-DELETE FROM dim_store_details
-WHERE NOT (trim(staff_numbers) ~ '^[0-9]+$');
 ALTER TABLE dim_store_details
 ALTER COLUMN staff_numbers TYPE SMALLINT USING (staff_numbers::smallint);
 
@@ -101,8 +108,23 @@ ALTER TABLE dim_store_details
 ALTER COLUMN store_type TYPE VARCHAR(255) 
 
 
+
+
+-- Step 1: Create a new column with the desired data type
 ALTER TABLE dim_store_details
-ALTER COLUMN latitude TYPE double precision USING (longitude::double precision);
+ADD COLUMN latitude_new double precision;
+-- Step 2: Update the new column with the values from the existing column
+UPDATE dim_store_details
+SET latitude_new = CASE WHEN latitude IS NULL THEN NULL ELSE CAST(latitude AS double precision) END;
+-- Step 3: Drop the old column
+ALTER TABLE dim_store_details
+DROP COLUMN latitude;
+-- Step 4: Rename the new column to the original column name
+ALTER TABLE dim_store_details
+RENAME COLUMN latitude_new TO latitude;
+
+ALTER TABLE dim_store_details
+ALTER COLUMN latitude TYPE double precision USING (latitude::double precision);
 
 ALTER TABLE dim_store_details
 ALTER COLUMN latitude TYPE FLOAT
@@ -172,9 +194,6 @@ ALTER TABLE dim_date_times
 ALTER COLUMN weight_class TYPE VARCHAR(14);
 
 
-
-
-
 -- ############   task 6  ################# --
 SELECT * FROM dim_date_times
 
@@ -239,65 +258,3 @@ ADD FOREIGN KEY (store_code) REFERENCES dim_store_details(store_code)
 
 ALTER TABLE orders_table
 ADD FOREIGN KEY (user_uuid) REFERENCES dim_users(user_uuid)
-
--- have to make sure the parent table includes the infos in the child table, so delete the raws in orders_table (child table with foreign key) where does not show up in the parent table (dim_tables)
-SELECT orders_table.*
-FROM orders_table
-LEFT JOIN dim_store_details
-ON orders_table.store_code = dim_store_details.store_code
-WHERE dim_store_details.store_code IS NULL;
-
-
-DELETE FROM orders_table
-WHERE index IN (
-    SELECT orders_table.index
-    FROM orders_table
-    LEFT JOIN dim_store_details
-    ON orders_table.store_code = dim_store_details.store_code
-    WHERE dim_store_details.store_code IS NULL
-);
-
-
-ALTER TABLE orders_table
-ADD FOREIGN KEY (store_code) REFERENCES dim_store_details(store_code)
-
-
--- SELECT orders_table.*
--- FROM orders_table
--- LEFT JOIN dim_card_details
--- ON orders_table.card_number = dim_card_details.card_number
--- WHERE dim_card_details.card_number IS NULL;
-
-
--- DELETE FROM orders_table
--- WHERE index IN (
---     SELECT orders_table.index
---     FROM orders_table
---     LEFT JOIN dim_card_details
---     ON orders_table.card_number = dim_card_details.card_number
---     WHERE dim_card_details.card_number IS NULL
--- );
-
-
--- ALTER TABLE orders_table
--- ADD FOREIGN KEY (card_number) REFERENCES dim_card_details(card_number)
-
--- SELECT orders_table.*
--- FROM orders_table
--- LEFT JOIN dim_users
--- ON orders_table.user_uuid = dim_users.user_uuid
--- WHERE dim_users.user_uuid IS NULL;
-
-
--- DELETE FROM orders_table
--- WHERE index IN (
---     SELECT orders_table.index
---     FROM orders_table
---     LEFT JOIN dim_users
---     ON orders_table.user_uuid = dim_users.user_uuid
---     WHERE dim_users.user_uuid IS NULL
--- );
-
-
--- ALTER TABLE orders_table
--- ADD FOREIGN KEY (user_uuid) REFERENCES dim_users(user_uuid)
