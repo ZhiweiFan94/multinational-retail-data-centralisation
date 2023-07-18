@@ -91,3 +91,4 @@ cleaned_table = clean_data.clean_datetime_date(selcted_table)
 #upload
 update_db = DatabaseConnector()
 update_db.upload_to_db(selcted_table,'dim_date_times')
+
