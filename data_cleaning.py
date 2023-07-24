@@ -6,6 +6,9 @@ class DataCleaning:
         pass
 
     def clean_user_data(self, selcted_table):
+        """
+        unify datetime record 
+        """
         #%%CLEAN TIME DATA
         time_col = 'date_of_birth' 
         date_list=[]
@@ -26,6 +29,9 @@ class DataCleaning:
     
 
     def clean_card_details(self,selcted_table):
+        """
+        transfer datetime data to the same format
+        """
         # Remove rows with null values
         df_cleaned = selcted_table.dropna()
         # Convert 'expiry_date' and 'date_payment_confirmed' to datetime format
@@ -35,6 +41,9 @@ class DataCleaning:
 
 
     def clean_store_data(self,selcted_table):
+        """
+        unify the categories and drop invalid record
+        """
         #%%DATA CLEAN for stores
         read_colomn = list(selcted_table.columns)
         selcted_table = selcted_table.drop(columns=read_colomn[0], axis=1)
@@ -57,6 +66,9 @@ class DataCleaning:
     
 
     def clean_products_data(self,df):
+        """
+        clean the categories and unify the weights measured in various units
+        """
         scope = ['toys-and-games', 'sports-and-leisure', 'pets', 'homeware', 'health-and-beauty',
        'food-and-drink', 'diy']
         df.drop(df[df['category'].apply(lambda x: x not in scope)].index, inplace=True)
@@ -92,11 +104,17 @@ class DataCleaning:
     
 
     def clean_orders_data(self,selcted_table):
+        """
+        remove the useless record
+        """
         selcted_table.drop(columns=['first_name','last_name','1'],inplace=True)
         return selcted_table
     
 
     def clean_datetime_date(self,df):
+        """
+        filter the valid time
+        """
         #%% delete all raws where the [year] column is not a valid year
         valid_year = ['2012', '1997', '1994', '2001', '2015', '2002', '1993', '2006',
             '2004', '2008', '2021', '2018', '2009', '2020', '2017', '2019',

@@ -1,1 +1,10 @@
-db_creds.yaml
+# .gitignore
+
+# Exclude all .yaml files in the current directory and its subdirectories
+*.yaml
+
+# Exclude .DS_Store files (macOS system files)
+.DS_Store
+
+# Exclude Python __pycache__ directories
+__pycache__
