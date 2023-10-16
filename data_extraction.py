@@ -1,16 +1,17 @@
 import yaml
-from sqlalchemy import create_engine
-from sqlalchemy import inspect
-import pandas as pd
 import tabula
 import requests
 import boto3
-
+import pandas as pd
+from sqlalchemy import create_engine
+from sqlalchemy import inspect
 
 class DataExtractor:
-    
+    """
+    extract dataset from different sources, it contains different methods explained in Readme file.
+    """
 
-    def __init__(self) -> None:
+    def __init__(self):
         pass
     
     def read_db_creds(self):
@@ -56,7 +57,6 @@ class DataExtractor:
         extract info from a pdf file to pd.dataframe
         '''
         pdf_info = tabula.read_pdf(pdf_path, pages='all')
-        # Read tables from the PDF file
         # Convert each list table to a DataFrame
         dataframes = []
         for table in pdf_info:
@@ -85,16 +85,25 @@ class DataExtractor:
             return store_list
         else:
             return 'the server does not respond'
+        
+    def storeapi_creds(self):
+        with open("store_creds.yaml", "r") as f:
+           return yaml.safe_load(f)
     
     def retrieve_stores_data(self):
         '''
         extract all stores infos through api
         '''
+        self.store_creds = self.storeapi_creds()
+        NUM_ENDPOINT = self.store_creds['NUM_ENDPOINT']
+        STORE_ENDPOINT = self.store_creds['STORE_ENDPOINT']
+        API_KEY =   self.store_creds['API_KEY']
+        #extract info using api
         store_info = []
-        self.list_number_of_stores(endpoint="https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores", header={"x-api-key": "yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"})
-        API_HEADERS = {"x-api-key": "yFBQbwXe9J3sd6zWVAMrK6lcxxr0q1lr2PT6DDMX"}
+        self.list_number_of_stores(endpoint=f"{NUM_ENDPOINT}", header={"x-api-key": f"{API_KEY}"})
+        API_HEADERS = {"x-api-key": f"{API_KEY}"}
         for store_number in range(self.total_number):
-            API_STORE = f'https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}'
+            API_STORE = f'{STORE_ENDPOINT}/{store_number}'
             Data_store = self.retrieve_single_stores_data(API_STORE, header=API_HEADERS)
             store_info.append(Data_store)
             print(store_number)
@@ -109,7 +118,7 @@ class DataExtractor:
         # Create an S3 client using the session
         s3_client = session.client("s3")
         # Download the file from the S3 bucket
-        download_path = "/Users/fanzhiwei/Desktop/Aicore-test/multinational-retail-data-centralisation/file.csv"  # Specify the local path to save the downloaded file
+        download_path = "./multinational-retail-data-centralisation/file.csv"  # Specify the local path to save the downloaded file
         s3_client.download_file(bucket_name, file_key, download_path)
         # Read the downloaded CSV file into a pandas DataFrame
         df = pd.read_csv(download_path)

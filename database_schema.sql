@@ -1,4 +1,7 @@
--- ############   task 1   ################# --
+-- Develop the star-based schema of the database, ensuring that the columns of the correct data types
+
+
+-- ############   Cast orders_table data types   ################# --
 SELECT * FROM orders_table
 
 -- Alter the data type of date_uuid column to UUID
@@ -13,8 +16,6 @@ ALTER COLUMN user_uuid TYPE UUID USING user_uuid::UUID;
 SELECT MAX(LENGTH(CAST(card_number AS VARCHAR))) AS max_card_number_length FROM orders_table;
 SELECT MAX(LENGTH(CAST(store_code AS VARCHAR))) AS max_store_code_length FROM orders_table;
 SELECT MAX(LENGTH(CAST(product_code AS VARCHAR))) AS max_product_code_length FROM orders_table;
-
-
 
 ALTER TABLE orders_table
 ALTER COLUMN card_number TYPE VARCHAR(22);
@@ -32,7 +33,7 @@ ALTER TABLE orders_table
 ALTER COLUMN product_quantity TYPE SMALLINT;
 
 
--- ############   task 2   ################# --
+-- ############   Cast dim_users_table data types   ################# --
 SELECT * FROM dim_users
 
 -- Alter first name
@@ -65,7 +66,7 @@ ALTER COLUMN join_date TYPE DATE
 -- WHERE join_date NOT LIKE '%-__'
 
 
--- ############   task 3  ################# --
+-- ############   Cast dim_store_details data types  ################# --
 SELECT * FROM dim_store_details
 
 -- Alter 
@@ -81,7 +82,6 @@ DROP COLUMN longitude;
 -- Step 4: Rename the new column to the original column name
 ALTER TABLE dim_store_details
 RENAME COLUMN longitude_new TO longitude;
-
 
 ALTER TABLE dim_store_details
 ALTER COLUMN longitude TYPE FLOAT
@@ -106,8 +106,6 @@ ALTER COLUMN opening_date TYPE DATE
 
 ALTER TABLE dim_store_details
 ALTER COLUMN store_type TYPE VARCHAR(255) 
-
-
 
 
 -- Step 1: Create a new column with the desired data type
@@ -136,8 +134,7 @@ ALTER TABLE dim_store_details
 ALTER COLUMN continent TYPE VARCHAR(255)
 
 
--- ############   task 4  ################# --
-
+-- ############   Make changes to the dim_products table to delivery team ################# --
 --The product_price column has a £ character which you need to remove using SQL.
 UPDATE dim_products
 SET product_price = REPLACE(product_price, '£', '');
@@ -150,7 +147,7 @@ ALTER COLUMN product_price TYPE numeric USING (product_price::numeric);
 ALTER TABLE dim_products
 ADD COLUMN weight_class VARCHAR(255);
 
--- Update the new column based on the weight column
+-- Update the new column based on the weight column for classification
 UPDATE dim_products
 SET weight_class = 
     CASE 
@@ -163,7 +160,7 @@ SET weight_class =
 ALTER TABLE dim_products
 RENAME COLUMN removed TO still_available;
 
--- ############   task 5  ################# --
+-- ############   Update dim_users_table data types  ################# --
 ALTER TABLE dim_products
 ALTER COLUMN product_price TYPE FLOAT USING (product_price::float)
 
@@ -194,7 +191,7 @@ ALTER TABLE dim_date_times
 ALTER COLUMN weight_class TYPE VARCHAR(14);
 
 
--- ############   task 6  ################# --
+-- ############   Update dim_date_times table  ################# --
 SELECT * FROM dim_date_times
 
 ALTER TABLE dim_date_times
@@ -213,7 +210,7 @@ ALTER TABLE dim_date_times
 ALTER COLUMN date_uuid TYPE UUID USING date_uuid::UUID;
 
 
--- ############   task 7  ################# --
+-- ############   Update dim_card_details table  ################# --
 SELECT max(length(cast(  expiry_date as VARCHAR))) FROM dim_card_details
 
 ALTER TABLE dim_card_details
@@ -226,7 +223,11 @@ ALTER TABLE dim_card_details
 ALTER COLUMN date_payment_confirmed TYPE DATE
 
 
--- ############   task 8  ################# --
+-- ############   Create primary keys in the dimension tables  ################# --
+--Now that the tables have the appropriate data types we can begin adding the primary keys to each of the tables prefixed with dim.
+--Each table will serve the orders_table which will be the single source of truth for our orders.
+--Check the column header of the orders_table you will see all but one of the columns exist in one of our tables prefixed with dim. We need to update the columns in the dim tables with a primary key that matches the same column in the orders_table.
+--Using SQL, update the respective columns as primary key columns.
 --create prime key in each dim table whose column contained in orders table
 ALTER TABLE dim_card_details
 ADD PRIMARY KEY (card_number);
@@ -244,6 +245,8 @@ ALTER TABLE dim_users
 ADD PRIMARY KEY (user_uuid);
 
 --Set foreign key to orders_table, link them
+--With the primary keys created in the tables prefixed with dim we can now create the foreign keys in the orders_table to reference the primary keys in the other tables.
+--Use SQL to create those foreign key constraints that reference the primary keys of the other table. This makes the star-based database schema complete.
 ALTER TABLE orders_table
 ADD FOREIGN KEY (card_number) REFERENCES dim_card_details(card_number)
 
