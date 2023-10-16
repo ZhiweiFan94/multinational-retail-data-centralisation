@@ -1,23 +1,28 @@
+import yaml
 from sqlalchemy import create_engine
 
 class DatabaseConnector:
     
-    def __init__(self) -> None:
-        pass
+    def read_keys(self):
+        with open('sale_db_key.yaml','r') as f:
+            return yaml.safe_load(f)
+        
 
     def my_sales_database(self):
         '''
         connect to my sales local database
         '''
-        DATABASE_TYPE = 'postgresql'
-        DBAPI = 'psycopg2'
-        HOST = '127.0.0.1'
-        USER = 'postgres'
-        PASSWORD = 'Dylan1994'
-        DATABASE = 'sales_data'
-        PORT = 5432
+        self.creds = self.read_keys()
+        DATABASE_TYPE = self.creds['DATABASE_TYPE']
+        DBAPI = self.creds['DBAPI']
+        HOST = self.creds['HOST']
+        USER = self.creds['USER']
+        PASSWORD = self.creds['PASSWORD']
+        DATABASE = self.creds['DATABASE']
+        PORT = self.creds['PORT']
         sales_engine = create_engine(f"{DATABASE_TYPE}+{DBAPI}://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
         return sales_engine
+    
     
     def upload_to_db(self, table, table_name):
         # new_table = pd.DataFrame(table)
