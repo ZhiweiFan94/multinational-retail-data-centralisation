@@ -12,19 +12,27 @@ class DataCleaning:
         #%%CLEAN TIME DATA
         time_col = 'date_of_birth' 
         date_list=[]
-        for i in range(len(selcted_table[time_col])):
-            date = pd.to_datetime(selcted_table[time_col].iloc[i],errors='coerce').date()
-            date_list.append(date)
-        selcted_table[time_col] = date_list
+        # for i in range(len(selcted_table[time_col])):
+        #     date = pd.to_datetime(selcted_table[time_col].iloc[i],errors='coerce').date()
+        #     date_list.append(date)
+        # selcted_table[time_col] = date_list
+        # selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+        # Update:: use simplified form
+        selcted_table.loc[:,time_col].apply(pd.to_datetime,errors='coerce')
         selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+
         #examine the another column about datetime data
         date_list=[]
         time_col = 'join_date'
-        for i in range(len(selcted_table[time_col])):
-            date = pd.to_datetime(selcted_table[time_col].iloc[i],errors='coerce').date()
-            date_list.append(date)
-        selcted_table[time_col] = date_list
+        # for i in range(len(selcted_table[time_col])):
+        #     date = pd.to_datetime(selcted_table[time_col].iloc[i],errors='coerce').date()
+        #     date_list.append(date)
+        # selcted_table[time_col] = date_list
+        # selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+        # Update:: use simplified form
+        selcted_table.loc[:,time_col].apply(pd.to_datetime,errors='coerce')
         selcted_table.drop(selcted_table[selcted_table[time_col].isna()].index, inplace=True)
+
         return selcted_table
     
 
